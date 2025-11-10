@@ -1,0 +1,38 @@
+name: Capture Terraform Outputs
+
+on:
+  workflow_run:
+    workflows: ["Deploy Terraform Network Project"]
+    types:
+      - completed
+
+jobs:
+  capture_outputs:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.7
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Output
+      run: |
+        echo "web_vm_name=$(terraform output -raw web_vm_name)" >> $GITHUB_ENV
+        echo "app_vm_name=$(terraform output -raw app_vm_name)" >> $GITHUB_ENV
+        echo "web_ip=$(terraform output -raw web_ip)" >> $GITHUB_ENV
+        echo "app_ip=$(terraform output -raw app_ip)" >> $GITHUB_ENV
+
+    - name: Log Outputs
+      run: |
+        echo "✅ Web VM Name: ${{ env.web_vm_name }}"
+        echo "✅ App VM Name: ${{ env.app_vm_name }}"
+        echo "🌐 Web IP: ${{ env.web_ip }}"
+        echo "🌐 App IP: ${{ env.app_ip }}"

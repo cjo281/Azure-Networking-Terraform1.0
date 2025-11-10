@@ -1,0 +1,198 @@
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "network_rg" {
+  name     = "NetRG2"
+  location = var.location
+}
+
+# NSGs
+resource "azurerm_network_security_group" "web_nsg" {
+  name                = "WebNSG3.2"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+
+  security_rule {
+    name                       = "AllowSSH"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "10.0.1.4"
+  }
+
+  security_rule {
+    name                       = "AllowHTTP"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "10.0.1.4"
+  }
+
+  security_rule {
+    name                       = "AllowHTTPS"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "10.0.1.4"
+  }
+}
+
+resource "azurerm_network_security_group" "app_nsg" {
+  name                = "AppNSG3.2"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+
+  security_rule {
+    name                       = "AllowSSH"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "10.0.2.4"
+  }
+
+  security_rule {
+    name                       = "AllowWebSubnet"
+    priority                   = 200
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "10.0.1.0/24"
+    destination_address_prefix = "10.0.2.4"
+  }
+
+  security_rule {
+    name                       = "DenyInternetIn"
+    priority                   = 300
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "10.0.2.4"
+  }
+}
+
+# VNet and Subnets
+resource "azurerm_virtual_network" "vnet" {
+  name                = "MyVnet3.2"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+  address_space       = ["10.0.0.0/16"]
+}
+
+resource "azurerm_subnet" "web_subnet" {
+  name                 = "WebSubnet3.2"
+  resource_group_name  = azurerm_resource_group.network_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+  network_security_group_id = azurerm_network_security_group.web_nsg.id
+}
+
+resource "azurerm_subnet" "app_subnet" {
+  name                 = "AppSubnet3.2"
+  resource_group_name  = azurerm_resource_group.network_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.2.0/24"]
+  network_security_group_id = azurerm_network_security_group.app_nsg.id
+}
+
+# NICs
+resource "azurerm_network_interface" "web_nic" {
+  name                = "WebVM3.2Nic"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+
+  ip_configuration {
+    name                          = "ipconfig1"
+    subnet_id                     = azurerm_subnet.web_subnet.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.0.1.4"
+  }
+}
+
+resource "azurerm_network_interface" "app_nic" {
+  name                = "AppVM3.2Nic"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+
+  ip_configuration {
+    name                          = "ipconfig1"
+    subnet_id                     = azurerm_subnet.app_subnet.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.0.2.4"
+  }
+}
+
+# Virtual Machines
+resource "azurerm_linux_virtual_machine" "web_vm" {
+  name                = "WebVM3.2"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+  size                = "Standard_B1ms"
+  admin_username      = var.admin_username
+  admin_password      = var.admin_password
+  network_interface_ids = [azurerm_network_interface.web_nic.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "app_vm" {
+  name                = "AppVM3.2"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+  size                = "Standard_B1ms"
+  admin_username      = var.admin_username
+  admin_password      = var.admin_password
+  network_interface_ids = [azurerm_network_interface.app_nic.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+}
+
+# Log Analytics Workspace
+resource "azurerm_log_analytics_workspace" "log_workspace" {
+  name                = "MyLogWorkspace32"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
