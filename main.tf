@@ -3,13 +3,13 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "network_rg" {
-  name     = "NetRG2"
+  name     = "NetRG1"
   location = var.location
 }
 
 # NSGs
 resource "azurerm_network_security_group" "web_nsg" {
-  name                = "WebNSG3.2"
+  name                = "WebNSG1.0"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
 
@@ -51,7 +51,7 @@ resource "azurerm_network_security_group" "web_nsg" {
 }
 
 resource "azurerm_network_security_group" "app_nsg" {
-  name                = "AppNSG3.2"
+  name                = "AppNSG1.0"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
 
@@ -94,14 +94,14 @@ resource "azurerm_network_security_group" "app_nsg" {
 
 # VNet and Subnets
 resource "azurerm_virtual_network" "vnet" {
-  name                = "MyVnet3.2"
+  name                = "MyVnet1.0"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
   address_space       = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "web_subnet" {
-  name                 = "WebSubnet3.2"
+  name                 = "WebSubnet1.0"
   resource_group_name  = azurerm_resource_group.network_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
@@ -109,7 +109,7 @@ resource "azurerm_subnet" "web_subnet" {
 }
 
 resource "azurerm_subnet" "app_subnet" {
-  name                 = "AppSubnet3.2"
+  name                 = "AppSubnet1.0"
   resource_group_name  = azurerm_resource_group.network_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
@@ -118,7 +118,7 @@ resource "azurerm_subnet" "app_subnet" {
 
 # NICs
 resource "azurerm_network_interface" "web_nic" {
-  name                = "WebVM3.2Nic"
+  name                = "WebVM1.0Nic"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
 
@@ -131,7 +131,7 @@ resource "azurerm_network_interface" "web_nic" {
 }
 
 resource "azurerm_network_interface" "app_nic" {
-  name                = "AppVM3.2Nic"
+  name                = "AppVM1.0Nic"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
 
@@ -145,7 +145,7 @@ resource "azurerm_network_interface" "app_nic" {
 
 # Virtual Machines
 resource "azurerm_linux_virtual_machine" "web_vm" {
-  name                = "WebVM3.2"
+  name                = "WebVM1.0"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
   size                = "Standard_B1ms"
@@ -167,7 +167,7 @@ resource "azurerm_linux_virtual_machine" "web_vm" {
 }
 
 resource "azurerm_linux_virtual_machine" "app_vm" {
-  name                = "AppVM3.2"
+  name                = "AppVM1.0"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
   size                = "Standard_B1ms"
