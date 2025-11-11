@@ -7,7 +7,7 @@ resource "azurerm_resource_group" "network_rg" {
   location = var.location
 }
 
-# NSGs
+# NSGS
 resource "azurerm_network_security_group" "web_nsg" {
   name                = "WebNSG1.0"
   location            = var.location
@@ -92,7 +92,7 @@ resource "azurerm_network_security_group" "app_nsg" {
   }
 }
 
-# VNet and Subnets
+# VNET AND SUBNETS
 resource "azurerm_virtual_network" "vnet" {
   name                = "MyVnet1.0"
   location            = var.location
@@ -105,7 +105,7 @@ resource "azurerm_subnet" "web_subnet" {
   resource_group_name  = azurerm_resource_group.network_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
-  network_security_group_id = azurerm_network_security_group.web_nsg.id
+  #network_security_group_id = azurerm_network_security_group.web_nsg.id
 }
 
 resource "azurerm_subnet" "app_subnet" {
@@ -113,10 +113,20 @@ resource "azurerm_subnet" "app_subnet" {
   resource_group_name  = azurerm_resource_group.network_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
+  #network_security_group_id = azurerm_network_security_group.app_nsg.id
+}
+# NSG ASSOCIATIONS
+resource "azurerm_subnet_network_security_group_association" "web_nsg_assoc" {
+  subnet_id                 = azurerm_subnet.web_subnet.id
+  network_security_group_id = azurerm_network_security_group.web_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "app_nsg_assoc" {
+  subnet_id                 = azurerm_subnet.app_subnet.id
   network_security_group_id = azurerm_network_security_group.app_nsg.id
 }
 
-# NICs
+# NICS
 resource "azurerm_network_interface" "web_nic" {
   name                = "WebVM1.0Nic"
   location            = var.location

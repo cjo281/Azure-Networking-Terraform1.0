@@ -1,15 +1,22 @@
 name: Capture Terraform Outputs
 
 on:
-  workflow_run:
-    workflows: ["Deploy Terraform Network Project"]
-    types:
-      - completed
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "staging"
+
+env:
+  TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
 
 jobs:
   capture_outputs:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: envs/${{ github.event.inputs.environment }}
 
     steps:
     - name: Checkout code
@@ -23,7 +30,7 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Terraform Output
+    - name: Capture Outputs
       run: |
         echo "web_vm_name=$(terraform output -raw web_vm_name)" >> $GITHUB_ENV
         echo "app_vm_name=$(terraform output -raw app_vm_name)" >> $GITHUB_ENV

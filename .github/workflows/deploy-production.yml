@@ -2,35 +2,32 @@ name: Deploy to Production (With Approval)
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Target environment"
-        required: true
-        default: "production"
+
+env:
+  TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
 
 jobs:
   request_approval:
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event.inputs.environment }}
-      url: https://portal.azure.com/
+      name: production
     steps:
     - name: Awaiting manual approval
-      run: echo "✅ Deployment to '${{ github.event.inputs.environment }}' approved. Proceeding..."
+      run: echo "✅ Approved for production deployment"
 
   deploy_production:
     needs: request_approval
     runs-on: ubuntu-latest
-    environment:
-      name: production
+    defaults:
+      run:
+        working-directory: envs/production
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.7
 
     - name: Terraform Init
       run: terraform init
@@ -40,6 +37,3 @@ jobs:
 
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
-
-    - name: Confirm Production Deployment
-      run: echo "🚀 Production deployment complete."

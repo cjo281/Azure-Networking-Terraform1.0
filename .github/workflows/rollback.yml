@@ -1,27 +1,28 @@
-name: Rollback Terraform Network Project
 
-on:
-  workflow_run:
-    workflows: ["Deploy Terraform Network Project"]
-    types:
-      - completed
+#name: Rollback Terraform Environment
+#on:
+  #workflow_run:
+    #workflows: ["Deploy to Staging", "Deploy to Production (With Approval)"]
+    #types:
+      #- completed
 
-jobs:
-  rollback:
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    runs-on: ubuntu-latest
+#jobs:
+  #rollback:
+    #if: $#{{ github.event.workflow_run.conclusion == 'failure' }}
+    #runs-on: ubuntu-latest
+    #defaults:
+      #run:
+        #working-directory: envs/staging  # or dynamically switch based on context
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    #steps:
+    #- name: Checkout code
+      #uses: actions/checkout@v3
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.7
+    #- name: Setup Terraform
+      #uses: hashicorp/setup-terraform@v2
 
-    - name: Terraform Init
-      run: terraform init
+    #- name: Terraform Init
+      #run: terraform init
 
-    - name: Terraform Destroy
-      run: terraform destroy -auto-approve
+    #- name: Terraform Destroy
+      #run: terraform destroy -auto-approve

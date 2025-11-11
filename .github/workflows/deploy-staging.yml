@@ -1,4 +1,4 @@
-name: Deploy Terraform Network Project
+name: Deploy to Staging
 
 on:
   push:
@@ -8,8 +8,11 @@ env:
   TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
 
 jobs:
-  deploy:
+  deploy_staging:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: envs/staging
 
     steps:
     - name: Checkout code
@@ -17,8 +20,6 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.7
 
     - name: Terraform Init
       run: terraform init
