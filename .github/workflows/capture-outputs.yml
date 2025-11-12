@@ -11,7 +11,7 @@ on:
 env:
   TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
   TF_VAR_admin_username: "azureuser"
-
+####
 jobs:
   capture_outputs:
     runs-on: ubuntu-latest
