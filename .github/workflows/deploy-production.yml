@@ -40,6 +40,10 @@ jobs:
 
     - name: Terraform Plan
       run: terraform plan -out=tfplan
+      
+    - name: Show Plan Summary
+      run: terraform show -no-color tfplan
+
 
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan

@@ -7,6 +7,8 @@ on:
 jobs:
   deploy_staging:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     defaults:
       run:
         working-directory: envs/staging

@@ -155,7 +155,7 @@ resource "azurerm_network_interface" "app_nic" {
 
 # Virtual Machines
 resource "azurerm_linux_virtual_machine" "web_vm" {
-  name                = "WebVM1.0"
+  name                = "WebVM2.0"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
   size                = "Standard_B1ms"
@@ -177,7 +177,7 @@ resource "azurerm_linux_virtual_machine" "web_vm" {
 }
 
 resource "azurerm_linux_virtual_machine" "app_vm" {
-  name                = "AppVM1.0"
+  name                = "AppVM2.0"
   location            = var.location
   resource_group_name = azurerm_resource_group.network_rg.name
   size                = "Standard_B1ms"
