@@ -1,17 +1,15 @@
 variable "location" {
-  description = "Azure region for deployment"
   type        = string
-  default     = "eastus"
+  description = "Azure region for deployment"
 }
 
 variable "admin_username" {
-  description = "Admin username for VMs"
   type        = string
-  default     = "azureuser"
+  description = "Admin username for VMs"
 }
 
 variable "admin_password" {
-  description = "Admin password for VMs"
   type        = string
+  description = "Admin password for VMs"
   sensitive   = true
 }

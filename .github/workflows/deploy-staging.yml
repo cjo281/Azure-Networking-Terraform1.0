@@ -4,17 +4,16 @@ on:
   push:
     branches: [ main ]
 
-env:
-  TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
-  TF_VAR_admin_username: "azureuser"
-
-
 jobs:
   deploy_staging:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: envs/staging
+
+    env:
+      TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+      TF_VAR_admin_username: "azureuser"
 
     steps:
     - name: Checkout code
