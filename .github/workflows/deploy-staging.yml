@@ -14,8 +14,10 @@ jobs:
         working-directory: envs/staging
 
     env:
-      TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+      TF_VAR_location: "East US"
       TF_VAR_admin_username: "azureuser"
+      TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+      
 
     steps:
     - name: Checkout code
