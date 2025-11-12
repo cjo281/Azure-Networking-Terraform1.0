@@ -1,10 +1,8 @@
 provider "azurerm" {
   features {}
 }
-variable "location" {}
-variable "admin_username" {}
-variable "admin_password" {}
-variable "admin_ssh_public_key" {}
+
+
 
 
 resource "azurerm_resource_group" "network_rg" {

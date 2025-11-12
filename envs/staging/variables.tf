@@ -13,4 +13,8 @@ variable "admin_password" {
   description = "Admin password for VMs"
   sensitive   = true
 }
-##
+
+variable "admin_ssh_public_key" {
+  type        = string
+  description = "SSH public key for VM login"
+}
