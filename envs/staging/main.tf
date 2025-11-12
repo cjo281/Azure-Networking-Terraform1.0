@@ -1,10 +1,38 @@
 provider "azurerm" {
   features {}
 }
+variable "location" {}
+variable "admin_username" {}
+variable "admin_password" {}
+variable "admin_ssh_public_key" {}
+
 
 resource "azurerm_resource_group" "network_rg" {
   name     = "NetRG1"
   location = var.location
+}
+# VNET AND SUBNETS
+resource "azurerm_virtual_network" "vnet" {
+  name                = "MyVnet1.0"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+  address_space       = ["10.0.0.0/16"]
+}
+
+resource "azurerm_subnet" "web_subnet" {
+  name                 = "WebSubnet1.0"
+  resource_group_name  = azurerm_resource_group.network_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+  #network_security_group_id = azurerm_network_security_group.web_nsg.id
+}
+
+resource "azurerm_subnet" "app_subnet" {
+  name                 = "AppSubnet1.0"
+  resource_group_name  = azurerm_resource_group.network_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.2.0/24"]
+  #network_security_group_id = azurerm_network_security_group.app_nsg.id
 }
 
 # NSGS
@@ -92,29 +120,7 @@ resource "azurerm_network_security_group" "app_nsg" {
   }
 }
 
-# VNET AND SUBNETS
-resource "azurerm_virtual_network" "vnet" {
-  name                = "MyVnet1.0"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.network_rg.name
-  address_space       = ["10.0.0.0/16"]
-}
 
-resource "azurerm_subnet" "web_subnet" {
-  name                 = "WebSubnet1.0"
-  resource_group_name  = azurerm_resource_group.network_rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.1.0/24"]
-  #network_security_group_id = azurerm_network_security_group.web_nsg.id
-}
-
-resource "azurerm_subnet" "app_subnet" {
-  name                 = "AppSubnet1.0"
-  resource_group_name  = azurerm_resource_group.network_rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.2.0/24"]
-  #network_security_group_id = azurerm_network_security_group.app_nsg.id
-}
 # NSG ASSOCIATIONS
 resource "azurerm_subnet_network_security_group_association" "web_nsg_assoc" {
   subnet_id                 = azurerm_subnet.web_subnet.id
@@ -160,7 +166,14 @@ resource "azurerm_linux_virtual_machine" "web_vm" {
   resource_group_name = azurerm_resource_group.network_rg.name
   size                = "Standard_B1ms"
   admin_username      = var.admin_username
-  admin_password      = var.admin_password
+
+  #Because you’re using SSH keys (admin_ssh_key), you don’t need a password.
+  #admin_password      = var.admin_password  
+
+  #If you leave this out and don’t provide a password, Terraform will fail. If you set it to false, you must provide admin_password.
+  #disable password login for the VM: SSH key authentication
+  disable_password_authentication = true
+
   network_interface_ids = [azurerm_network_interface.web_nic.id]
 
   os_disk {
@@ -174,6 +187,11 @@ resource "azurerm_linux_virtual_machine" "web_vm" {
     sku       = "22_04-lts-gen2"
     version   = "latest"
   }
+  tags = {
+    environment = "staging" # change to "production" in production/main.tf
+  }
+  #This adds a tag to every VM (or resource) indicating its environment. Benefits
+
 }
 
 resource "azurerm_linux_virtual_machine" "app_vm" {
@@ -182,7 +200,9 @@ resource "azurerm_linux_virtual_machine" "app_vm" {
   resource_group_name = azurerm_resource_group.network_rg.name
   size                = "Standard_B1ms"
   admin_username      = var.admin_username
-  admin_password      = var.admin_password
+  #admin_password      = var.admin_password
+
+  disable_password_authentication = true
   network_interface_ids = [azurerm_network_interface.app_nic.id]
 
   os_disk {
@@ -196,6 +216,10 @@ resource "azurerm_linux_virtual_machine" "app_vm" {
     sku       = "22_04-lts-gen2"
     version   = "latest"
   }
+  tags = {
+    environment = "staging" # change to "production" in production/main.tf
+  }
+
 }
 
 # Log Analytics Workspace

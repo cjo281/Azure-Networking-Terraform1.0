@@ -4,8 +4,11 @@ on:
   workflow_dispatch:
 
 env:
-  TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+  TF_VAR_location: "East US"
   TF_VAR_admin_username: "azureuser"
+  TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+  TF_VAR_admin_ssh_public_key: ${{ secrets.ADMIN_SSH_PUBLIC_KEY_PROD }}
+
 
 jobs:
   request_approval:
@@ -14,7 +17,7 @@ jobs:
       name: production
     steps:
     - name: Awaiting manual approval
-      run: echo "✅ Approved for production deployment"
+      run: echo "Approved for production deployment"
 
   deploy_production:
     needs: request_approval
@@ -34,13 +37,16 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.7
+
 
     - name: Terraform Init
       run: terraform init
 
     - name: Terraform Plan
       run: terraform plan -out=tfplan
-      
+
     - name: Show Plan Summary
       run: terraform show -no-color tfplan
 
