@@ -10,6 +10,7 @@ on:
 
 env:
   TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+  TF_VAR_admin_username: "azureuser"
 
 jobs:
   capture_outputs:
@@ -26,7 +27,7 @@ jobs:
       uses: azure/login@v1
       with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
       with:

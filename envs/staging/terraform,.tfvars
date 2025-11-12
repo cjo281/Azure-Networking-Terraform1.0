@@ -1,3 +1,3 @@
-admin_password = "P@ssword1234!"  # Replace with secure value or use environment variable
-
-#ask for help1
+location        = "East US"
+admin_username  = "azureuser"
+admin_password  = "REPLACE_ME" # overridden by TF_VAR_admin_password

@@ -6,6 +6,8 @@ on:
 
 env:
   TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+  TF_VAR_admin_username: "azureuser"
+
 
 jobs:
   deploy_staging:
@@ -17,7 +19,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      
+
     - name: Azure Login
       uses: azure/login@v1
       with:
