@@ -2,9 +2,6 @@ provider "azurerm" {
   features {}
 }
 
-
-
-
 resource "azurerm_resource_group" "network_rg" {
   name     = "NetRG1"
   location = var.location
